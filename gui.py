@@ -15,13 +15,16 @@ class MyFrame(Frame):
         if not path:
             return False
 
+        self.f4Text.configure(state='normal')
+        self.f4Text2.configure(state='normal')
+
         ext = path.split(".")[-1]
         # 파일 읽기 성공(True), 읽은 파일 내용, 읽은 키 내용 리턴
         if self.state == 1:
             if ext != "txt":
                 messagebox.showwarning("메시지 상자", "txt 파일만 가능합니다.")
                 return False
-            result, filetxt, encKeys = self.readFile(path, 1)
+            result, filetxt, encKeys = self.readFile(path, self.state)
             if result:
                 self.f4Text.delete(1.0, END)
                 self.f4Text.insert(1.0, filetxt)
@@ -32,17 +35,19 @@ class MyFrame(Frame):
             if ext != "enc":
                 messagebox.showwarning("메시지 상자", "enc 파일만 가능합니다.")
                 return False
-            result, filetxt, encKeys = self.readFile(path, 2)
+            result, filetxt, encKeys = self.readFile(path, self.state)
             if result:
                 self.f4Text.delete(1.0, END)
                 self.f4Text2.delete(1.0, END)
                 self.f4Text.insert(1.0, filetxt)
                 self.f4Text2.insert(1.0, encKeys)
+                self.f4Text2.configure(state='disabled')
             else:
                 messagebox.showerror("메시지 상자", "파일을 읽는데 실패하였습니다.")
                 return False
 
         self.f2Label2.config(text=path)
+        self.f4Text.configure(state='disabled')
 
     # 암호화 함수 - 파라메터는 파일이름, 암호화 할 파일본문, 비밀번호 합
     def encryption(self, filename, txt, pwcode):
@@ -76,8 +81,7 @@ class MyFrame(Frame):
         # 암호키 딕셔너리, 암호화 된 텍스트, 암호화된 암호키를 리턴
         return codeDict, codedText, encKeys
 
-        # 복호화 함수 - 파라메터는 파일이름, 암호화 된 파일본문, 비밀번호 합, 암호키(암호화된 상태)
-
+    # 복호화 함수 - 파라메터는 파일이름, 암호화 된 파일본문, 비밀번호 합, 암호키(암호화된 상태)
     def decryption(self, filename, txt, pwcode, enkeys):
         enkeys = enkeys.split()  # 암호화된 암호키 텍스트를 공백을 이용해 리스트로 분리
         codeDict = {}  # 복호키 저장할 dictionary
@@ -92,7 +96,7 @@ class MyFrame(Frame):
                 decodedText += codeDict[int(t)]
         except:
             # 복호화 실패하면 False를 리턴
-            return False
+            return False, codeDict, decodedText
 
         # 복호화 된 텍스트 저장
         filename = filename.split('.')[0]  # 확장자를 제외하고 따로 저장
@@ -101,14 +105,14 @@ class MyFrame(Frame):
         outf.close()
 
         # 복호키 딕셔너리, 복호화 된 텍스트 리턴
-        return codeDict, decodedText
+        return True, codeDict, decodedText
 
     # 파일 읽기 함수 - 파라메터는 파일경로, 암호화(1)인지 복호화(2)인지 여부
     def readFile(self, filepath, choice):
         try:
             # 대상 파일 열기
             inf = open(filepath, encoding='utf-8')
-            filetxt = inf.read(500)
+            filetxt = inf.read(self.limit)
             inf.close()
 
             # 복호화의 경우, 키 파일 열기
@@ -144,6 +148,10 @@ class MyFrame(Frame):
 
     def selectState(self):
         #초기화
+        self.f4Text.configure(state='normal')
+        self.f4Text2.configure(state='normal')
+        self.f4Text3.configure(state='normal')
+        self.f4Text4.configure(state='normal')
         self.f2Label2.config(text='')
         self.f3Entry.delete(0, END)
         self.f4Text.delete(1.0, END)
@@ -190,9 +198,12 @@ class MyFrame(Frame):
             self.f4Text4.insert(1.0, encKeys)
         elif self.state == 2:
             # 복호키 딕셔너리, 복호화 된 텍스트 리턴
-            codeDict, decodedText = self.decryption(filePath, fileContent, password, fileKeyContent)
-            self.f4Text3.insert(1.0, codeDict)
-            self.f4Text4.insert(1.0, decodedText)
+            result, codeDict, decodedText = self.decryption(filePath, fileContent, password, fileKeyContent)
+            if result:
+                self.f4Text3.insert(1.0, codeDict)
+                self.f4Text4.insert(1.0, decodedText)
+            else:
+                messagebox.showwarning("메시지 상자", "잘못된 비밀번호입니다.")
 
     def __init__(self, master):
         Frame.__init__(self, master)
@@ -202,9 +213,9 @@ class MyFrame(Frame):
         self.pack(fill=BOTH, expand=True)
 
         self.state = 0
-        self.bool = False
+        self.limit = 500
 
-        #역역1
+        #영역1
         frame1 = Frame(self)
         frame1.pack(fill=X)
 
@@ -246,7 +257,7 @@ class MyFrame(Frame):
         f3Button = Button(frame3, width=15, text="RUN", command=self.runResult)
         f3Button.pack(side=RIGHT, padx=10, pady=10,)
 
-
+        #영역4
         frame4 = Frame(self)
         frame4.pack(fill=BOTH, expand=True)
 
