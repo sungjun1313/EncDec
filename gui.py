@@ -17,7 +17,7 @@ class MyFrame(tk.Frame):
         self.f4Text2.configure(state='normal')
 
         ext = path.split(".")[-1]
-        # 파일 읽기 성공(True), 읽은 파일 내용, 읽은 키 내용 리턴
+        # readFile 함수에서 파일 읽기 성공(True), 읽은 파일 내용, 읽은 키 내용 리턴 -> state에 따라 다르게 처리
         if self.state == 1:
             if ext != "txt":
                 messagebox.showwarning("메시지 상자", "txt 파일만 가능합니다.")
@@ -89,6 +89,8 @@ class MyFrame(tk.Frame):
             for i in range(0, len(enkeys), 2):
                 codeDict[int(enkeys[i + 1]) - pwcode] = chr(int(enkeys[i]) - pwcode)
 
+            #raise Exception
+
             # 암호화된 텍스트를 복호키를 이용해 복호화
             for t in txt.split():
                 decodedText += codeDict[int(t)]
@@ -113,6 +115,8 @@ class MyFrame(tk.Frame):
             filetxt = inf.read(self.limit)
             inf.close()
 
+            #raise IOError
+
             # 복호화의 경우, 키 파일 열기
             encKeys = []
             if choice == 2:  # Decryption
@@ -125,7 +129,7 @@ class MyFrame(tk.Frame):
 
         except IOError as err:
             # 파일 읽기 실패하면 파일 읽기 실패(False)와 실패 사유 메시지 리턴
-            return False, 'I/O Error {}'.format(err)
+            return False, 'I/O Error {}'.format(err), "error"
 
     # 비밀번호 형식 체크 함수
     def checkPW(self, pw):
