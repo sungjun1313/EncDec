@@ -1,17 +1,15 @@
-import os
-
-from tkinter import *
-from tkinter.ttk import *
-from tkinter import filedialog
+import tkinter as tk
 from tkinter import messagebox
+from tkinter import filedialog
+#tk.messagebox, tk.filedialog 이렇게 사용할 경우 import error 발생. 직접 messagebox, filedialog를 import해서 사용해야 된다.
 
-class MyFrame(Frame):
+class MyFrame(tk.Frame):
+    #Open file 버튼 클릭 시 실행, 파일 경로 및 내용 가져옴
     def openPattern(self):
         if self.state == 0:
             messagebox.showwarning("메시지 상자", "라디오버튼을 선택해주세요.")
             return False
         path = filedialog.askopenfilename()
-        #fileName = os.path.basename(path)
         if not path:
             return False
 
@@ -26,7 +24,7 @@ class MyFrame(Frame):
                 return False
             result, filetxt, encKeys = self.readFile(path, self.state)
             if result:
-                self.f4Text.delete(1.0, END)
+                self.f4Text.delete(1.0, tk.END)
                 self.f4Text.insert(1.0, filetxt)
             else:
                 messagebox.showerror("메시지 상자", "파일을 읽는데 실패하였습니다.")
@@ -37,8 +35,8 @@ class MyFrame(Frame):
                 return False
             result, filetxt, encKeys = self.readFile(path, self.state)
             if result:
-                self.f4Text.delete(1.0, END)
-                self.f4Text2.delete(1.0, END)
+                self.f4Text.delete(1.0, tk.END)
+                self.f4Text2.delete(1.0, tk.END)
                 self.f4Text.insert(1.0, filetxt)
                 self.f4Text2.insert(1.0, encKeys)
                 self.f4Text2.configure(state='disabled')
@@ -146,53 +144,51 @@ class MyFrame(Frame):
             # 비밀번호 형식이 잘 맞으면 4자리 합을 리턴
             return pwcode
 
+    # 라디오 버튼 클릭 시 초기화 및 상태 설정
     def selectState(self):
-        #초기화
         self.f4Text.configure(state='normal')
         self.f4Text2.configure(state='normal')
         self.f4Text3.configure(state='normal')
         self.f4Text4.configure(state='normal')
         self.f2Label2.config(text='')
-        self.f3Entry.delete(0, END)
-        self.f4Text.delete(1.0, END)
-        self.f4Text2.delete(1.0, END)
-        self.f4Text3.delete(1.0, END)
-        self.f4Text4.delete(1.0, END)
+        self.f3Entry.delete(0, tk.END)
+        self.f4Text.delete(1.0, tk.END)
+        self.f4Text2.delete(1.0, tk.END)
+        self.f4Text3.delete(1.0, tk.END)
+        self.f4Text4.delete(1.0, tk.END)
         if self.f1Var.get() == 1:
             self.state = 1
         elif self.f1Var.get() == 2:
             self.state = 2
 
+    # 암호화, 복호화하는 RUN 버튼 클릭 시 실행, 암호화 복호화된 파일 생성 및 내용을 보여줌
     def runResult(self):
-        #print(self.f2Label2.cget("text"))
-        #print(self.f3Entry.get())
-        #print(self.f4Text.get("1.0",END))
         pw = self.f3Entry.get()
         password = self.checkPW(pw)
 
         filePath = self.f2Label2.cget("text")
-        fileContent = self.f4Text.get("1.0",END)
-        fileKeyContent = self.f4Text2.get("1.0",END)
+        fileContent = self.f4Text.get("1.0", tk.END)
+        fileKeyContent = self.f4Text2.get("1.0", tk.END)
 
         if self.state == 0:
             messagebox.showwarning("메시지 상자", "라디오버튼을 선택해주세요.")
-            return False
-
-        if not password:
-            messagebox.showwarning("메시지 상자", "올바른 비밀번호를 입력해주세요.")
             return False
 
         if not filePath:
             messagebox.showwarning("메시지 상자", "파일을 선택해주세요")
             return False
 
-        self.f4Text3.delete(1.0, END)
-        self.f4Text4.delete(1.0, END)
+        if not password:
+            messagebox.showwarning("메시지 상자", "올바른 비밀번호를 입력해주세요.")
+            return False
+
+        self.f4Text3.delete(1.0, tk.END)
+        self.f4Text4.delete(1.0, tk.END)
 
         if self.state == 1:
             # 암호키 딕셔너리, 암호화 된 텍스트, 암호화된 암호키를 리턴
             codeDict, codedText, encKeys = self.encryption(filePath, fileContent, password)
-            self.f4Text2.delete(1.0, END)
+            self.f4Text2.delete(1.0, tk.END)
             self.f4Text2.insert(1.0, codeDict)
             self.f4Text3.insert(1.0, codedText)
             self.f4Text4.insert(1.0, encKeys)
@@ -205,77 +201,77 @@ class MyFrame(Frame):
             else:
                 messagebox.showwarning("메시지 상자", "잘못된 비밀번호입니다.")
 
+    # 프로그램 초기화, 자리 배치 및 함수 연결
     def __init__(self, master):
-        Frame.__init__(self, master)
+        tk.Frame.__init__(self, master)
 
         self.master = master
         self.master.title("Encryption/Decryption")
-        self.pack(fill=BOTH, expand=True)
+        self.pack(fill=tk.BOTH, expand=True)
 
         self.state = 0
         self.limit = 500
 
         #영역1
-        frame1 = Frame(self)
-        frame1.pack(fill=X)
+        frame1 = tk.Frame(self)
+        frame1.pack(fill=tk.X)
 
-        f1Label = Label(frame1, text="Choose 1 or 2", width=20)
-        f1Label.pack(side=LEFT, padx=10, pady=10,)
+        f1Label = tk.Label(frame1, text="Choose 1 or 2", width=20)
+        f1Label.pack(side=tk.LEFT, padx=10, pady=10,)
 
-        self.f1Var = IntVar()
+        self.f1Var = tk.IntVar()
 
-        f1Radio1 = Radiobutton(frame1, text="1-Encryption", variable=self.f1Var,  value=1, command=self.selectState)
-        f1Radio1.pack(side=LEFT, padx=10, pady=10,)
+        f1Radio1 = tk.Radiobutton(frame1, text="1-Encryption", variable=self.f1Var,  value=1, command=self.selectState)
+        f1Radio1.pack(side=tk.LEFT, padx=10, pady=10,)
 
-        f1Radio2 = Radiobutton(frame1, text="1-Decryption", variable=self.f1Var,  value=2, command=self.selectState)
-        f1Radio2.pack(side=LEFT, padx=10, pady=10,)
+        f1Radio2 = tk.Radiobutton(frame1, text="1-Decryption", variable=self.f1Var,  value=2, command=self.selectState)
+        f1Radio2.pack(side=tk.LEFT, padx=10, pady=10,)
 
         #영역2
-        frame2 = Frame(self)
-        frame2.pack(fill=X)
+        frame2 = tk.Frame(self)
+        frame2.pack(fill=tk.X)
 
-        f2Label = Label(frame2, text="file name", width=20)
-        f2Label.pack(side=LEFT, padx=10, pady=10,)
+        f2Label = tk.Label(frame2, text="file name", width=20)
+        f2Label.pack(side=tk.LEFT, padx=10, pady=10,)
 
-        self.f2Label2 = Label(frame2, text="", width=40)
-        self.f2Label2.pack(side=LEFT, padx=10, pady=10,)
+        self.f2Label2 = tk.Label(frame2, text="", width=40)
+        self.f2Label2.pack(side=tk.LEFT, padx=10, pady=10,)
 
-        f2Button = Button(frame2, width=15, text="Open File", command=self.openPattern)
-        f2Button.pack(side=RIGHT, padx=10, pady=10,)
+        f2Button = tk.Button(frame2, width=15, text="Open File", command=self.openPattern)
+        f2Button.pack(side=tk.RIGHT, padx=10, pady=10,)
 
         #영역3
-        frame3 = Frame(self)
-        frame3.pack(fill=X)
-        #frame3.pack(fill=BOTH, expand=True)
+        frame3 = tk.Frame(self)
+        frame3.pack(fill=tk.X)
 
-        f3Label = Label(frame3, text="password(4 characters)", width=20)
-        f3Label.pack(side=LEFT, padx=10, pady=10,)
+        f3Label = tk.Label(frame3, text="password(4 characters)", width=20)
+        f3Label.pack(side=tk.LEFT, padx=10, pady=10,)
 
-        self.f3Entry = Entry(frame3, show="*")
-        self.f3Entry.pack(side=LEFT, padx=10, pady=10)
+        self.f3Entry = tk.Entry(frame3, show="*")
+        self.f3Entry.pack(side=tk.LEFT, padx=10, pady=10)
 
-        f3Button = Button(frame3, width=15, text="RUN", command=self.runResult)
-        f3Button.pack(side=RIGHT, padx=10, pady=10,)
+        f3Button = tk.Button(frame3, width=15, text="RUN", command=self.runResult)
+        f3Button.pack(side=tk.RIGHT, padx=10, pady=10,)
 
         #영역4
-        frame4 = Frame(self)
-        frame4.pack(fill=BOTH, expand=True)
+        frame4 = tk.Frame(self)
+        frame4.pack(fill=tk.BOTH, expand=True)
 
-        self.f4Text = Text(frame4, height=7)
-        self.f4Text.pack(fill=X, pady=1, padx=20)
+        self.f4Text = tk.Text(frame4, height=7)
+        self.f4Text.pack(fill=tk.X, pady=1, padx=20)
 
-        self.f4Text2 = Text(frame4, height=7)
-        self.f4Text2.pack(fill=X, pady=1, padx=20)
+        self.f4Text2 = tk.Text(frame4, height=7)
+        self.f4Text2.pack(fill=tk.X, pady=1, padx=20)
 
-        self.f4Text3 = Text(frame4, height=7)
-        self.f4Text3.pack(fill=X, pady=1, padx=20)
+        self.f4Text3 = tk.Text(frame4, height=7)
+        self.f4Text3.pack(fill=tk.X, pady=1, padx=20)
 
-        self.f4Text4 = Text(frame4, height=7)
-        self.f4Text4.pack(fill=X, pady=1, padx=20)
+        self.f4Text4 = tk.Text(frame4, height=7)
+        self.f4Text4.pack(fill=tk.X, pady=1, padx=20)
 
-
+#프로그램 실행
 def main():
-    root = Tk()
+    root = tk.Tk()
     root.geometry("700x550+100+100")
     app = MyFrame(root)
     root.mainloop()
